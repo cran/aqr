@@ -15,22 +15,29 @@ aqLoadOHLC <- function(seriesId, freq, startDate, endDate, con = aqInit()){
 	low = read.csv(buildArchiveURL(con, seriesId, "LOW", freq, startDate, endDate))
 	close = read.csv(buildArchiveURL(con, seriesId, "CLOSE", freq, startDate, endDate))
 	volume = read.csv(buildArchiveURL(con, seriesId, "VOLUME", freq, startDate, endDate))
-	# convert everything to XTS. 
-	if(nrow(volume)==0)
-		volume = NA 
-	else 
-		volume = volume[,3]
-	ohlcv = cbind(open[,3], high[,3], low[,3], close[,3], volume)
- 	if(nrow(ohlcv)>0){
-	  	xtsOhlcv= xts(ohlcv, order.by=as.POSIXct(open[,1]/1000000000, origin="1970/01/01"))
-	  	colnames(xtsOhlcv) <- c("OPEN", "HIGH", "LOW", "CLOSE", "VOLUME")
+	if(nrow(high)==nrow(open) && nrow(low) == nrow(open) && nrow(close) == nrow(open) && nrow(open)>0 ){
+	  # convert everything to XTS. 
+	  if(nrow(volume)==0)
+		  volume = NA 
+	  else 
+		  volume = volume[,3]
+	  ohlcv = cbind(open[,3], high[,3], low[,3], close[,3], volume)
+	  if(nrow(ohlcv)>0){
+		  xtsOhlcv= xts(ohlcv, order.by=as.POSIXct(open[,1]/1000000000, origin="1970/01/01"))
+		  colnames(xtsOhlcv) <- c("OPEN", "HIGH", "LOW", "CLOSE", "VOLUME")
 
-	  	# 
-		return(xtsOhlcv)
+		  # 
+		  return(xtsOhlcv)
+	  }			
 	}
-	else{	
-		return(NA)
-	}
+	# still here. 
+	return(xts())
+}
+
+aqStoreMatrix <- function(seriesId, freq, data, con=aqInit(), silent=FALSE){
+  for(i in colnames(data)){
+    aqStoreSeriesField(seriesId, i, freq, data[,i], con, silent);
+  }
 }
 
 aqLoadSeriesField <- function(seriesId, fieldId, freq, startDate, endDate, con = aqInit()){
@@ -45,7 +52,7 @@ aqLoadSeriesField <- function(seriesId, fieldId, freq, startDate, endDate, con =
 		return(dataXts)
 	}
 	else{
-		return(NA)
+		return(xts())
 	}
 
 }
@@ -53,18 +60,20 @@ aqLoadSeriesField <- function(seriesId, fieldId, freq, startDate, endDate, con =
 # this function assumes that data is either a zoo object, or that is a matrix with two columns where the first column contains a time series index in NANOSECONDS(!!!)
 aqStoreSeriesField <- function(seriesId, fieldId, freq, data, con = aqInit(), silent=FALSE){
 	require(RCurl)	
-	# let's check if we have a zoo object. 
 
 	if(ncol(data)>2){
-	  cat("Only the first data column will be stored\n")
+	  warning("Only the first data column will be stored.")
 	}
   
 	toBeStored <- c()
+	# let's check if we have a zoo object. 
 	if(sum(class(data)=="zoo")>0){
 	  # convert it to nano seconds. 
-	  toBeStored <- cbind(as.numeric(index(data))*1000000000, data[,1])
+	  toBeStored <- cbind(as.numeric(as.POSIXct(index(data))) * 1000000000, data[,1])
 	}
 	else{
+	  # 
+	  warning("No zoo object. First column assumed to be timestamp in nanoseconds and second column assumed to contain data series.") 
 	  toBeStored = data[,1:2]
 	}
 	
