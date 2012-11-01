@@ -1,0 +1,9 @@
+a59ef71551a452bac571fc9aae4e0c38 *DESCRIPTION
+e1dc77bf9afbe0cdd18ba2b57473bc98 *NAMESPACE
+2aaaa7dd7a6fa26f04379f0be1b5fe43 *R/aq_config.R
+580da2c186b2ba4b5adf9abf9126582c *R/hist_data.R
+c4418ffbca2cf1afed55453a650573c6 *man/aqinit.Rd
+fd1909f92d6f877fce2eb5134ae3cb7e *man/aqloadohlc.Rd
+cccd5ecb3b37751aff403ac072efe588 *man/aqloadseriesfield.Rd
+c71d62e3dac15d07d270da4f135da7ca *man/aqstoreseriesfield.Rd
+85325ff20b6a332e18551f2ea059ae2e *man/buildarchiveurl.Rd
