@@ -1,3 +1,4 @@
+import(xts)
+import(RCurl)
 useDynLib(aqr)
 exportPattern("^[[:alpha:]]+")
-
